@@ -1,0 +1,44 @@
+networks:
+  wpnet: {}
+services:
+  database:
+    container_name: mysqlserver
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_PASSWORD: wpuser123
+      MYSQL_ROOT_PASSWORD: mysqlroot123
+      MYSQL_USER: wpuser
+    image: mysql:5.7
+    networks:
+      wpnet: null
+    restart: always
+    volumes:
+    - mysql-data:/var/lib/mysql:rw
+    deploy:
+      mode: replicated
+      replicas: 2
+      endpoint_mode: dnsrr
+
+  wordpress:
+    container_name: wordpress
+    environment:
+      WORDPRESS_DB_HOST: mysqlserver
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_PASSWORD: wpuser123
+      WORDPRESS_DB_USER: wpuser
+    image: wordpress:latest
+    networks:
+      wpnet: null
+    ports:
+    - 80:80/tcp
+    restart: always
+    volumes:
+    - wordpress-data:/var/www/html:rw
+    deploy:
+      mode: replicated
+      replicas: 2
+      endpoint_mode: vip
+version: '3.2'
+volumes:
+  mysql-data: {}
+  wordpress-data: {}
